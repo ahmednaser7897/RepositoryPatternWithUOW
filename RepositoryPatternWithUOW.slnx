@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="RepositoryPatternWithUOW.Api/RepositoryPatternWithUOW.Api.csproj" />
+  <Project Path="RepositoryPatternWithUOW.Core/RepositoryPatternWithUOW.Core.csproj" />
+  <Project Path="RepositoryPatternWithUOW.Ef/RepositoryPatternWithUOW.Ef.csproj" />
+</Solution>
