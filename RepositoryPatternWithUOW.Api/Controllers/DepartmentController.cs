@@ -10,16 +10,25 @@ namespace RepositoryPatternWithUOW.Api.Controllers;
 //http://localhost:5260/swagger/index.html
 public class DepartmentController : ControllerBase
 {
-    private readonly IBaseRepository<Department> Repository;
-    public DepartmentController(IBaseRepository<Department> repository)
+    //Instead of using RepositoryPattern and injecting many repositories 
+    // we will use Unit of Work Pattern with Repository Pattern
+    //private readonly IBaseRepository<Department> DepartmentRepository;
+    //private readonly IBaseRepository<Employee> EmployeeRepository;
+    private readonly IUnitOfWork UnitOfWork;
+    public DepartmentController(
+        // IBaseRepository<Department> departmentRepository,
+        // IBaseRepository<Employee> employeeRepository
+        IUnitOfWork UnitOfWork)
     {
-        Repository = repository;
+        // DepartmentRepository = departmentRepository;
+        // EmployeeRepository = employeeRepository;
+        this.UnitOfWork = UnitOfWork;
     }
 
     [HttpGet()]
     public async Task<IActionResult> GetAlldepartment()
     {
-        var departments = await Repository.GetAll();
+        var departments = await UnitOfWork.Departments.GetAll();
         var dept = departments.Select(
             (s) => new DeptWithEmpDTO
             {
@@ -30,13 +39,26 @@ public class DepartmentController : ControllerBase
         return Ok(dept);
 
     }
+    [HttpGet("GetAllEmployees")]
+    public async Task<IActionResult> GetAllEmployees()
+    {
+        var employees = await UnitOfWork.Employees.GetAll();
+        return Ok(employees);
+    }
+
+    [HttpGet("GetEmployeesOfDepartment")]
+    public async Task<IActionResult> GetEmployeesOfDepartment(int id)
+    {
+        var employees = await UnitOfWork.Departments.GetEmployeesOfDepartment(id);
+        return Ok(employees);
+    }
 
 
     [HttpGet]
     [Route("{id:int}")]//api/department/"id"
     public async Task<IActionResult> GetByDepartmentId(int id)
     {
-        var department = await Repository.GetById(id);
+        var department = await UnitOfWork.Departments.GetById(id);
         if (department == null)
             return NotFound($"department with id {id} is not found");
         var dept = new DeptWithEmpDTO
@@ -51,7 +73,7 @@ public class DepartmentController : ControllerBase
     [Route("findByName")]//api/department/findByName?name=HR
     public async Task<IActionResult> FindByDepartmentName(string name)
     {
-        var department = await Repository.FindAsync(e => e.Name.Contains(name), ["Employees"]);
+        var department = await UnitOfWork.Departments.FindAsync(e => e.Name.Contains(name), ["Employees"]);
         if (department == null)
             return NotFound($"department with name {name} is not found");
         var dept = new DeptWithEmpDTO
@@ -67,21 +89,21 @@ public class DepartmentController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Addepartment(Department department)
     {
-        await Repository.Add(department);
-        await Repository.SaveChangesAsync();
+        await UnitOfWork.Departments.Add(department);
+        await UnitOfWork.Complete();
         var model = GetByDepartmentId(department.Id);
         return CreatedAtAction(nameof(GetByDepartmentId), new { id = department.Id }, model);
     }
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateDepartment(int id, Department department)
     {
-        var deptFromDb = await Repository.GetById(id);
+        var deptFromDb = await UnitOfWork.Departments.GetById(id);
         if (deptFromDb != null)
         {
             deptFromDb.Name = department.Name;
             deptFromDb.ManagerName = department.ManagerName;
-            await Repository.Update(deptFromDb);
-            await Repository.SaveChangesAsync();
+            await UnitOfWork.Departments.Update(deptFromDb);
+            await UnitOfWork.Complete();
             return NoContent();
         }
         else
@@ -93,10 +115,10 @@ public class DepartmentController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteDepartment(int id)
     {
-        var isDeleted = await Repository.Remove(id);
+        var isDeleted = await UnitOfWork.Departments.Remove(id);
         if (isDeleted)
         {
-            await Repository.SaveChangesAsync();
+            await UnitOfWork.Complete();
             return NoContent();
         }
         else

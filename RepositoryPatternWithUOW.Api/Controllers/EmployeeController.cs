@@ -10,17 +10,17 @@ namespace RepositoryPatternWithUOW.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 //http://localhost:5260/swagger/index.html
-public class EmployeeController(IBaseRepository<Employee> repository) : ControllerBase
+public class EmployeeController(IUnitOfWork unitOfWork) : ControllerBase
 {
-    private readonly IBaseRepository<Employee> Repository = repository;
-
+    //private readonly IBaseRepository<Employee> Repository = repository;
+    private readonly IUnitOfWork UnitOfWork = unitOfWork;
     //  http://localhost:5260/api/Employee/
 
     [HttpGet]
     public async Task<ActionResult<GenralResponse>> GetAllEmployee()
     {
 
-        var allEmployees = await Repository.GetAll();
+        var allEmployees = await UnitOfWork.Employees.GetAll();
         return Ok(new GenralResponse
         {
             Data = allEmployees,
@@ -35,7 +35,7 @@ public class EmployeeController(IBaseRepository<Employee> repository) : Controll
     [AllowAnonymous]
     public async Task<ActionResult<GenralResponse>> GetByEmployeeId(int id)
     {
-        var employee = await Repository.GetById(id);
+        var employee = await UnitOfWork.Employees.GetById(id);
         GenralResponse response;
         if (employee != null)
         {
@@ -63,7 +63,7 @@ public class EmployeeController(IBaseRepository<Employee> repository) : Controll
     [Route("findByName")]//api/department/findByName?name=HR
     public async Task<IActionResult> FindByEmployeeName(string name)
     {
-        var employee = await Repository.FindAsync(e => e.Name.Contains(name), ["Department"]);
+        var employee = await UnitOfWork.Employees.FindAsync(e => e.Name.Contains(name), ["Department"]);
 
         if (employee == null)
             return NotFound($"Employee with name {name} is not found");
@@ -80,8 +80,8 @@ public class EmployeeController(IBaseRepository<Employee> repository) : Controll
     [HttpPost]
     public async Task<IActionResult> AdEmployee(Employee Employee)
     {
-        await Repository.Add(Employee);
-        await Repository.SaveChangesAsync();
+        await UnitOfWork.Employees.Add(Employee);
+        await UnitOfWork.Employees.SaveChangesAsync();
         var model = await GetByEmployeeId(Employee.Id);
         //ex: location: http://localhost:5260/api/Employee/6
         return CreatedAtAction(nameof(GetByEmployeeId), new { id = Employee.Id }, model);
@@ -89,7 +89,7 @@ public class EmployeeController(IBaseRepository<Employee> repository) : Controll
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateEmployee(int id, Employee Employee)
     {
-        var deptFromDb = await Repository.GetById(id);
+        var deptFromDb = await UnitOfWork.Employees.GetById(id);
         if (deptFromDb != null)
         {
             deptFromDb.Name = Employee.Name;
@@ -97,8 +97,8 @@ public class EmployeeController(IBaseRepository<Employee> repository) : Controll
             deptFromDb.Salary = Employee.Salary;
             deptFromDb.JopTitle = Employee.JopTitle;
             deptFromDb.ImageUrl = Employee.ImageUrl;
-            await Repository.Update(deptFromDb);
-            await Repository.SaveChangesAsync();
+            await UnitOfWork.Employees.Update(deptFromDb);
+            await UnitOfWork.Employees.SaveChangesAsync();
             return NoContent();
         }
         else
@@ -110,10 +110,10 @@ public class EmployeeController(IBaseRepository<Employee> repository) : Controll
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteEmployee(int id)
     {
-        var isDeleted = await Repository.Remove(id);
+        var isDeleted = await UnitOfWork.Employees.Remove(id);
         if (isDeleted)
         {
-            await Repository.SaveChangesAsync();
+            await UnitOfWork.Employees.SaveChangesAsync();
             return NoContent();
         }
         else
@@ -126,7 +126,7 @@ public class EmployeeController(IBaseRepository<Employee> repository) : Controll
     [Route("findAllEmployees")]//api/department/findByName?name=HR
     public async Task<ActionResult<GenralResponse>> FindAllEmployees()
     {
-        var allEmployees = await Repository.FindAllAsync(
+        var allEmployees = await UnitOfWork.Employees.FindAllAsync(
             predicate: e => e.Salary > 1000, ["Department"],
             take: 4, skip: 2, orderBy: e => e.Salary, isAscending: false);
         return Ok(new GenralResponse
