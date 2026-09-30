@@ -1,6 +1,8 @@
-﻿namespace RepositoryPatternWithUOW.Core.Models;
+﻿using RepositoryPatternWithUOW.Core.Specification;
 
-public class Department
+namespace RepositoryPatternWithUOW.Core.Models;
+
+public class Department : IEntity<int>
 {
     public int Id { get; set; }
     public string Name { get; set; } = null!;

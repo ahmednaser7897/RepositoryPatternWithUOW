@@ -1,10 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using RepositoryPatternWithUOW.Core.Models;
 using RepositoryPatternWithUOW.Core.Repository;
+using RepositoryPatternWithUOW.Core.Specification;
 
 namespace RepositoryPatternWithUOW.Ef.Repository;
 
-public class DepartmentRepository(AppDbContext context) : BaseRepository<Department>(context), IDepartmentRepository
+public class DepartmentRepository<Department, TKey>(AppDbContext context)
+: BaseRepository<Department, TKey>(context),
+IDepartmentRepository<Department, TKey>
+where Department : class, IEntity<TKey>
 {
     public async Task<List<Employee>> GetEmployeesOfDepartment(int id)
     {

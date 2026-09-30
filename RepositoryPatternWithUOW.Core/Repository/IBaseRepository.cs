@@ -1,24 +1,28 @@
 using System.Linq.Expressions;
+using RepositoryPatternWithUOW.Core.Specification;
 
 namespace RepositoryPatternWithUOW.Core.Repository;
 
-public interface IBaseRepository<T> where T : class
+public interface IBaseRepository<TEntity, TKey> where TEntity : IEntity<TKey>
 {
-    Task<T?> GetById(int id);
-    Task<List<T>> GetAll();
-    Task<bool> Add(T model);
-    Task<bool> Update(T model);
-    Task<bool> Remove(int id);
+    Task<TEntity?> GetById(TKey id);
+    Task<List<TEntity>> GetAll();
+    Task<bool> Add(TEntity model);
+    Task<bool> Update(TEntity model);
+    Task<bool> Remove(TKey id);
     Task<bool> SaveChangesAsync();
-    Task<T?> FindAsync(Expression<Func<T, bool>> predicate, List<string>? includes = null);
-    Task<List<T>> FindAllAsync(
-        Expression<Func<T, bool>> predicate,
+    Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> predicate, List<string>? includes = null);
+    Task<List<TEntity>> FindAllAsync(
+        Expression<Func<TEntity, bool>> predicate,
         List<string>? includes = null,
         int? take = null,
         int? skip = null,
-        Expression<Func<T, object>>? orderBy = null,
+        Expression<Func<TEntity, object>>? orderBy = null,
         bool isAscending = true
     );
+    //---------------------------------------------
+    Task<TEntity?> GetByIdWithSpec(ISpecification<TEntity, TKey> spec);
+    Task<List<TEntity>> GetAllWithSpec(ISpecification<TEntity, TKey> spec);
 
 
 }

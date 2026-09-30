@@ -6,17 +6,17 @@ namespace RepositoryPatternWithUOW.Ef.Repository;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly AppDbContext _context;
-    public IBaseRepository<Employee> Employees { get; private set; }
-    //public IBaseRepository<Department> Departments{ get; private set; }
-    public IDepartmentRepository Departments { get; private set; }
+    public IBaseRepository<Employee, int> Employees { get; private set; }
+
+    public IDepartmentRepository<Department, int> Departments { get; private set; }
 
 
     public UnitOfWork(AppDbContext context)
     {
         _context = context;
-        Employees = new BaseRepository<Employee>(_context);
+        Employees = new BaseRepository<Employee, int>(_context);
         //Departments = new BaseRepository<Department>(_context);
-        Departments = new DepartmentRepository(_context);
+        Departments = new DepartmentRepository<Department, int>(_context);
     }
     public Task<int> Complete()
     {

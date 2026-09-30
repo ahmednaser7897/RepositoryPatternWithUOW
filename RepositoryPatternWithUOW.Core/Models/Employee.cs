@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using RepositoryPatternWithUOW.Core.Specification;
 namespace RepositoryPatternWithUOW.Core.Models;
 
-public class Employee
+public class Employee : IEntity<int>
 {
     public int Id { get; set; }
     [Required(ErrorMessage = "Name is required")]

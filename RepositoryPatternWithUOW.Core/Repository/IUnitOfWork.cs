@@ -4,8 +4,8 @@ namespace RepositoryPatternWithUOW.Core.Repository;
 
 public interface IUnitOfWork : IDisposable
 {
-    public IBaseRepository<Employee> Employees { get; }
+    public IBaseRepository<Employee, int> Employees { get; }
     //public IBaseRepository<Department> Departments { get; }
-    public IDepartmentRepository Departments { get; }
+    public IDepartmentRepository<Department, int> Departments { get; }
     public Task<int> Complete();
 }

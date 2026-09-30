@@ -21,7 +21,7 @@ public static class Program
            options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
        );
         //Inject BaseRepository in Repository Pattern
-        builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+        //builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
         //Inject UnitOfWork in Unit of Work Pattern with Repository Pattern
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         AddCors(builder);
