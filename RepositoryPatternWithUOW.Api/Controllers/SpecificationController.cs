@@ -17,12 +17,12 @@ public class SpecificationController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<GenralResponse>> GetAllEmployee()
     {
-        var specifications = new BaseSpecifications<Employee, int>();
-        specifications.AddInclude(e => e.Department);
-        specifications.AddPagination(5, 1);
-        specifications.AddOrderBy(e => e.Salary);
-        specifications.AddCriteria(e => e.Salary > 1000);
-        var allEmployees = await UnitOfWork.Employees.GetAllWithSpec(specifications);
+        // var specifications = new BaseSpecifications<Employee, int>();
+        // specifications.AddInclude(e => e.Department);
+        // specifications.AddPagination(5, 1);
+        // specifications.AddOrderBy(e => e.Salary);
+        // specifications.AddCriteria(e => e.Salary > 1000);
+        var allEmployees = await UnitOfWork.Employees.GetAllWithSpec(new GetAllEmployeesSpec());
         return Ok(new GenralResponse
         {
             Data = allEmployees,
@@ -76,5 +76,15 @@ public class SpecificationController(IUnitOfWork unitOfWork) : ControllerBase
             Message = "Employee retrieved successfully",
             StatusCode = 200
         });
+    }
+}
+class GetAllEmployeesSpec : BaseSpecifications<Employee, int>
+{
+    public GetAllEmployeesSpec() : base()
+    {
+        AddInclude(e => e.Department);
+        AddPagination(5, 1);
+        AddOrderBy(e => e.Salary);
+        AddCriteria(e => e.Salary > 1000);
     }
 }

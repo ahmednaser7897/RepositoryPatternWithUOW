@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 
 namespace RepositoryPatternWithUOW.Core.Specification;
 
-public class BaseSpecifications<TEntity, TKey>
+public abstract class BaseSpecifications<TEntity, TKey>
 : ISpecification<TEntity, TKey>
 where TEntity : class, IEntity<TKey>
 {
